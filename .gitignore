@@ -348,3 +348,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/SvgFont2Files/Properties/launchSettings.json
+/SvgFont2SvgFont/Properties/launchSettings.json

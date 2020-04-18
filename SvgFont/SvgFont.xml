@@ -1,0 +1,185 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SvgFont</name>
+    </assembly>
+    <members>
+        <member name="T:Svg.GlyphSetting">
+            <summary>
+            Setting
+            </summary>
+        </member>
+        <member name="P:Svg.GlyphSetting.GlyphName">
+            <summary>
+            Gets or sets the glyph name
+            </summary>
+        </member>
+        <member name="P:Svg.GlyphSetting.SourceFile">
+            <summary>
+            Gets the source file
+            </summary>
+        </member>
+        <member name="P:Svg.GlyphSetting.SourceUnicode">
+            <summary>
+            Gets or sets the source unicode
+            </summary>
+        </member>
+        <member name="P:Svg.GlyphSetting.Source">
+            <summary>
+            Gets or sets the source unicode as hexadecimal string
+            </summary>
+        </member>
+        <member name="P:Svg.GlyphSetting.DestinationUnicode">
+            <summary>
+            Gets or sets the destination unicode
+            </summary>
+        </member>
+        <member name="P:Svg.GlyphSetting.Destination">
+            <summary>
+            Gets or sets the source unicode as hexadecimal string
+            </summary>
+        </member>
+        <member name="T:Svg.GlyphWriter">
+            <summary>
+            Glyph writer to add a glyph in a SVG font
+            </summary>
+        </member>
+        <member name="M:Svg.GlyphWriter.#ctor(System.IO.TextWriter)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Svg.GlyphWriter"/> class
+            </summary>
+            <param name="textWriter">text writer</param>
+        </member>
+        <member name="P:Svg.GlyphWriter.Flip">
+            <inheritdoc/>
+        </member>
+        <member name="M:Svg.GlyphWriter.WriteAsync(Svg.SvgFile,System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Svg.IWriter">
+            <summary>
+            Interface for writers
+            </summary>
+        </member>
+        <member name="P:Svg.IWriter.Flip">
+            <summary>
+            Gets a value indicating whether the icon should be flipped or not
+            </summary>
+        </member>
+        <member name="M:Svg.IWriter.WriteAsync(Svg.SvgFile,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Saves a SVG file
+            </summary>
+            <param name="svgFile">svg file</param>
+            <param name="outputFolder">output folder</param>
+            <param name="cancellationToken">cancellation token</param>
+            <returns>a <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation</returns>
+        </member>
+        <member name="T:Svg.SvgFile">
+            <summary>
+            SVG file
+            </summary>
+        </member>
+        <member name="M:Svg.SvgFile.#ctor(System.String,System.Int32,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Svg.SvgFile"/> class
+            </summary>
+            <param name="glyphName">glyph name</param>
+            <param name="unicode">unicode value</param>
+            <param name="pathData">path data</param>
+        </member>
+        <member name="P:Svg.SvgFile.GlyphName">
+            <summary>
+            Gets the glyph name
+            </summary>
+        </member>
+        <member name="P:Svg.SvgFile.Unicode">
+            <summary>
+            Gets the unicode value
+            </summary>
+        </member>
+        <member name="P:Svg.SvgFile.PathData">
+            <summary>
+            Gets the path data
+            </summary>
+        </member>
+        <member name="M:Svg.SvgFile.GetPath(System.String)">
+            <summary>
+            Gets the file path
+            </summary>
+            <param name="outputFolder">output folder</param>
+            <returns>the file path</returns>
+        </member>
+        <member name="T:Svg.SvgFileWriter">
+            <summary>
+            SVG file writer to save a glyph on disk
+            </summary>
+        </member>
+        <member name="P:Svg.SvgFileWriter.Flip">
+            <inheritdoc/>
+        </member>
+        <member name="M:Svg.SvgFileWriter.WriteAsync(Svg.SvgFile,System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Svg.SvgFont">
+            <summary>
+            SVG font class
+            </summary>
+        </member>
+        <member name="M:Svg.SvgFont.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Svg.SvgFont"/> class
+            </summary>
+        </member>
+        <member name="M:Svg.SvgFont.ToFilesAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Converts a SVG font to individuals SVG files
+            </summary>
+            <param name="config">configuration file path</param>
+            <param name="outputFolder">output folder</param>
+            <param name="cancellationToken">a token that may be used to cancel the operation</param>
+            <returns>a <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation</returns>
+        </member>
+        <member name="M:Svg.SvgFont.ToFilesAsync(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Converts a SVG font to individuals SVG files
+            </summary>
+            <param name="input">SVG font file path</param>
+            <param name="outputFolder">output folder</param>
+            <param name="config">configuration file path</param>
+            <param name="cancellationToken">a token that may be used to cancel the operation</param>
+            <returns>a <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation</returns>
+        </member>
+        <member name="M:Svg.SvgFont.ToFilesAsync(System.Xml.XmlDocument,System.String,System.Collections.Generic.IEnumerable{Svg.GlyphSetting},System.Threading.CancellationToken)">
+            <summary>
+            Converts a SVG font to individuals SVG files
+            </summary>
+            <param name="xmlDocument">XML document</param>
+            <param name="outputFolder">output folder</param>
+            <param name="settings">advanced settings</param>
+            <param name="cancellationToken">a token that may be used to cancel the operation</param>
+            <returns>a <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation</returns>
+        </member>
+        <member name="M:Svg.SvgFont.GetFile(System.Xml.XmlNode,System.Int32,System.Int32,System.Int32,System.Collections.Generic.IEnumerable{Svg.GlyphSetting})">
+            <summary>
+            Gets a SVG file
+            </summary>
+            <param name="xmlNode">XML node</param>
+            <param name="defaultCharWidth">default char width</param>
+            <param name="defaultCharHeight">default char width</param>
+            <param name="defaultCharAscent">default char ascent</param>
+            <param name="settings">settings</param>
+            <returns>extracted file or null if there is no glyph in this line</returns>
+        </member>
+        <member name="M:Svg.SvgFont.ToSvgFontAsync(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets some icons from one or multiple SVG fonts and make a new SVG font
+            </summary>
+            <param name="input">SVG font input file pat</param>
+            <param name="output">output file path</param>
+            <param name="config">configuration file path for advanced setting</param>
+            <param name="cancellationToken">cancellation token</param>
+            <returns>a <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation</returns>
+        </member>
+    </members>
+</doc>
