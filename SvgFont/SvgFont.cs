@@ -244,9 +244,14 @@ namespace Svg
                 return null;
             }
 
-            var sourceUnicode = (int)xmlNode.Attributes[UnicodeAttributeName].Value[0];
+            var sourceUnicode = (int?)xmlNode.Attributes[UnicodeAttributeName]?.Value[0];
+            if (sourceUnicode == null)
+            {
+                return null;
+            }
+
             string? glyphName = null;
-            int destUnicode = sourceUnicode;
+            int destUnicode = (int)sourceUnicode;
 
             if (settings != null)
             {

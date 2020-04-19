@@ -350,3 +350,6 @@ MigrationBackup/
 .ionide/
 /SvgFont2Files/Properties/launchSettings.json
 /SvgFont2SvgFont/Properties/launchSettings.json
+/SegoeMDL2AssetsAlternative/Files
+/SegoeMDL2AssetsAlternative/SegMDL2Files
+/SegoeMDL2AssetsAlternative/SegMDL2.svg
