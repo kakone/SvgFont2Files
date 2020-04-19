@@ -281,16 +281,15 @@ namespace Svg
         /// <summary>
         /// Gets some icons from one or multiple SVG fonts and make a new SVG font
         /// </summary>
-        /// <param name="input">SVG font input file pat</param>
-        /// <param name="output">output file path</param>
         /// <param name="config">configuration file path for advanced setting</param>
+        /// <param name="output">output file path</param>
         /// <param name="cancellationToken">cancellation token</param>
         /// <returns>a <see cref="Task"/> representing the asynchronous operation</returns>
-        public async Task ToSvgFontAsync(string? input = null, string? output = null, string? config = null, CancellationToken cancellationToken = default)
+        public async Task ToSvgFontAsync(string config, string? output = null, CancellationToken cancellationToken = default)
         {
             using var textWriter = new StreamWriter(output ?? DefaultFontFilename, false, Encoding.UTF8);
             await textWriter.WriteAsync(string.Format(SvgFontFileHeader, Environment.NewLine, DefaultSize, Path.GetFileNameWithoutExtension(output)));
-            await new SvgFont(new GlyphWriter(textWriter)).ToFilesAsync(input, Path.GetDirectoryName(output), config, cancellationToken);
+            await new SvgFont(new GlyphWriter(textWriter)).ToFilesAsync(null, Path.GetDirectoryName(output), config, cancellationToken);
             await textWriter.WriteAsync(string.Format(SvgFontFileFooter, Environment.NewLine));
         }
     }

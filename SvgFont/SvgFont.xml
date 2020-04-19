@@ -172,13 +172,12 @@
             <param name="settings">settings</param>
             <returns>extracted file or null if there is no glyph in this line</returns>
         </member>
-        <member name="M:Svg.SvgFont.ToSvgFontAsync(System.String,System.String,System.String,System.Threading.CancellationToken)">
+        <member name="M:Svg.SvgFont.ToSvgFontAsync(System.String,System.String,System.Threading.CancellationToken)">
             <summary>
             Gets some icons from one or multiple SVG fonts and make a new SVG font
             </summary>
-            <param name="input">SVG font input file pat</param>
-            <param name="output">output file path</param>
             <param name="config">configuration file path for advanced setting</param>
+            <param name="output">output file path</param>
             <param name="cancellationToken">cancellation token</param>
             <returns>a <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation</returns>
         </member>

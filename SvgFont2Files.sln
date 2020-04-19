@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SvgFont2Files", "SvgFont2Fi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SvgFont", "SvgFont\SvgFont.csproj", "{83F60951-168A-4971-B25F-BBBE9F0B4AE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgFont2SvgFont", "SvgFont2SvgFont\SvgFont2SvgFont.csproj", "{6373B718-047C-4DD1-BD78-0181CEE17CD1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SvgFont2SvgFont", "SvgFont2SvgFont\SvgFont2SvgFont.csproj", "{6373B718-047C-4DD1-BD78-0181CEE17CD1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{44525A56-D556-455A-9E3E-3AC4161395C2}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
