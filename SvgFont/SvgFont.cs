@@ -25,10 +25,11 @@ namespace Svg
         private const string HorizAdvXAttributeName = "horiz-adv-x";
         private const string UnitsPerEmAttributeName = "units-per-em";
         private const string AscentAttributeName = "ascent";
+        private const string DescentAttributeName = "descent";
         private const string PathDataAttributeName = "d";
         private const string UnicodeAttributeName = "unicode";
         private const string GlyphNameAttributeName = "glyph-name";
-        internal const int DefaultSize = 1024;
+        internal const int DefaultSize = 2048;
         private const string SvgFontFileHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>{0}" +
             "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">{0}" +
             "<svg xmlns=\"http://www.w3.org/2000/svg\">{0}" +
@@ -195,8 +196,9 @@ namespace Svg
         {
             var defaultCharWidth = Parse(xmlDocument.GetElementsByTagName(FontTagName).Cast<XmlNode>().FirstOrDefault(), HorizAdvXAttributeName, DefaultSize);
             var fontFace = xmlDocument.GetElementsByTagName(FontFaceTagName).Cast<XmlNode>().FirstOrDefault();
-            var defaultCharHeight = Parse(fontFace, UnitsPerEmAttributeName, DefaultSize);
-            var defaultCharAscent = Parse(fontFace, AscentAttributeName, DefaultSize);
+            var charHeight = Parse(fontFace, UnitsPerEmAttributeName, DefaultSize);
+            var charAscent = Parse(fontFace, AscentAttributeName, DefaultSize);
+            var charDescent = Parse(fontFace, DescentAttributeName, 0);
 
             if (!string.IsNullOrEmpty(outputFolder))
             {
@@ -210,7 +212,7 @@ namespace Svg
                     continue;
                 }
 
-                var glyph = GetFile(xmlNode, defaultCharWidth, defaultCharHeight, defaultCharAscent, settings);
+                var glyph = GetFile(xmlNode, defaultCharWidth, charHeight, charAscent, charDescent, settings);
                 if (glyph != null)
                 {
                     Console.WriteLine($"Save {glyph.GlyphName}");
@@ -228,12 +230,13 @@ namespace Svg
         /// </summary>
         /// <param name="xmlNode">XML node</param>
         /// <param name="defaultCharWidth">default char width</param>
-        /// <param name="defaultCharHeight">default char width</param>
-        /// <param name="defaultCharAscent">default char ascent</param>
+        /// <param name="charHeight">char height</param>
+        /// <param name="charAscent">char ascent</param>
+        /// <param name="charDescent">char descent</param>
         /// <param name="settings">settings</param>
         /// <returns>extracted file or null if there is no glyph in this line</returns>
-        public SvgFile? GetFile(XmlNode xmlNode, int defaultCharWidth = DefaultSize, int defaultCharHeight = DefaultSize, int defaultCharAscent = DefaultSize,
-            IEnumerable<GlyphSetting>? settings = null)
+        public SvgFile? GetFile(XmlNode xmlNode, int defaultCharWidth = DefaultSize, int charHeight = DefaultSize, int charAscent = DefaultSize,
+            int charDescent = 0, IEnumerable<GlyphSetting>? settings = null)
         {
             var pathData = xmlNode.Attributes[PathDataAttributeName]?.Value;
             if (string.IsNullOrEmpty(pathData))
@@ -269,12 +272,9 @@ namespace Svg
             }
 
             var skPath = SKPath.ParseSvgPathData(pathData);
-            if (Writer.Flip)
-            {
-                skPath.Transform(SKMatrix.MakeTranslation(0, -defaultCharAscent));
-            }
+            skPath.Transform(SKMatrix.MakeTranslation(0, Writer.Flip ? -charAscent : charDescent));
             skPath.Transform(SKMatrix.MakeScale((float)DefaultSize / Parse(xmlNode, HorizAdvXAttributeName, defaultCharWidth),
-                (Writer.Flip ? -1 : 1) * (float)DefaultSize / defaultCharHeight));
+                (Writer.Flip ? -1 : 1) * (float)DefaultSize / charHeight));
             return new SvgFile(glyphName, destUnicode, skPath.Simplify().ToSvgPathData());
         }
 
