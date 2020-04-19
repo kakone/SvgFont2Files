@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Globalization;
+using System.IO;
 
 namespace Svg
 {
@@ -13,7 +14,7 @@ namespace Svg
         /// <param name="glyphName">glyph name</param>
         /// <param name="unicode">unicode value</param>
         /// <param name="pathData">path data</param>
-        public SvgFile(string glyphName, int unicode, string pathData)
+        public SvgFile(string glyphName, string unicode, string pathData)
         {
             GlyphName = glyphName;
             Unicode = unicode;
@@ -28,7 +29,7 @@ namespace Svg
         /// <summary>
         /// Gets the unicode value
         /// </summary>
-        public int Unicode { get; }
+        public string Unicode { get; }
 
         /// <summary>
         /// Gets the path data
@@ -42,7 +43,8 @@ namespace Svg
         /// <returns>the file path</returns>
         public string GetPath(string? outputFolder)
         {
-            return Path.Combine(outputFolder ?? string.Empty, $"{GlyphName}-U0x{Unicode:X}.svg");
+            return Path.Combine(outputFolder ?? string.Empty,
+                $"{GlyphName}{(int.TryParse(Unicode, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var unicode) ? $"-U0x{unicode:X}" : string.Empty)}.svg");
         }
     }
 }

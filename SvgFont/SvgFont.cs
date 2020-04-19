@@ -61,11 +61,6 @@ namespace Svg
             return string.IsNullOrEmpty(attributeValue) ? defaultValue : int.Parse(attributeValue);
         }
 
-        private string? GetCellHexValue(SharedStringTable? stringTable, IEnumerable<Cell> cells, int index)
-        {
-            return GetCellValue(stringTable, cells, index)?.Trim().Replace("&#x", "").Replace("0x", "").Replace(";", "");
-        }
-
         private string? GetCellValue(SharedStringTable? stringTable, IEnumerable<Cell> cells, int index)
         {
             if (index >= cells.Count())
@@ -74,8 +69,8 @@ namespace Svg
             }
 
             var cell = cells.ElementAt(index);
-            return cell.DataType.Value == CellValues.SharedString ? stringTable.ElementAt(int.Parse(cell.CellValue.Text)).InnerText :
-                cell.CellValue.Text;
+            return (cell.DataType.Value == CellValues.SharedString ? stringTable.ElementAt(int.Parse(cell.CellValue.Text)).InnerText :
+                cell.CellValue.Text).Trim();
         }
 
         private async Task<IEnumerable<GlyphSetting>?> ReadConfigFileAsync(string? config, CancellationToken cancellationToken)
@@ -101,15 +96,15 @@ namespace Svg
                     }
 
                     var cells = row.Elements<Cell>();
-                    var destination = GetCellHexValue(stringTable, cells, 3);
+                    var destination = GetCellValue(stringTable, cells, 3);
                     if (!string.IsNullOrWhiteSpace(destination))
                     {
                         glyphSettings.Add(new GlyphSetting()
                         {
                             GlyphName = GetCellValue(stringTable, cells, 0),
                             SourceFile = GetCellValue(stringTable, cells, 1),
-                            Source = $"0x{GetCellHexValue(stringTable, cells, 2)}",
-                            Destination = $"0x{destination}"
+                            SourceUnicode = GetCellValue(stringTable, cells, 2)!,
+                            DestinationUnicode = destination
                         });
                     }
                 }
@@ -244,18 +239,22 @@ namespace Svg
                 return null;
             }
 
-            var sourceUnicode = (int?)xmlNode.Attributes[UnicodeAttributeName]?.Value[0];
-            if (sourceUnicode == null)
+            var sourceUnicode = xmlNode.Attributes[UnicodeAttributeName]?.Value;
+            if (string.IsNullOrEmpty(sourceUnicode))
             {
                 return null;
             }
 
+            if (sourceUnicode.Length == 1)
+            {
+                sourceUnicode = ((int)sourceUnicode.First()).ToString("X");
+            }
+            var destUnicode = sourceUnicode;
             string? glyphName = null;
-            int destUnicode = (int)sourceUnicode;
 
             if (settings != null)
             {
-                var setting = settings.FirstOrDefault(s => s.SourceUnicode == sourceUnicode);
+                var setting = settings.FirstOrDefault(s => s.SourceUnicode.Equals(sourceUnicode, StringComparison.InvariantCultureIgnoreCase));
                 if (setting == null)
                 {
                     return null;
@@ -263,7 +262,7 @@ namespace Svg
                 glyphName = setting.GlyphName;
                 if (setting.DestinationUnicode != null)
                 {
-                    destUnicode = (int)setting.DestinationUnicode;
+                    destUnicode = setting.DestinationUnicode;
                 }
             }
 

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿using System;
 
 namespace Svg
 {
@@ -17,32 +17,43 @@ namespace Svg
         /// </summary>
         public string? SourceFile { get; set; }
 
+        private string? _sourceUnicode;
         /// <summary>
         /// Gets or sets the source unicode
         /// </summary>
-        public int SourceUnicode { get; set; }
-
-        /// <summary>
-        /// Gets or sets the source unicode as hexadecimal string
-        /// </summary>
-        public string Source
+        public string SourceUnicode
         {
-            get => SourceUnicode.ToString("X");
-            set => SourceUnicode = (int)new Int32Converter().ConvertFromInvariantString(value);
+            get => _sourceUnicode ?? throw new ArgumentNullException();
+            set => _sourceUnicode = GetHexValue(value);
         }
 
+        private string? _destinationUnicode;
         /// <summary>
         /// Gets or sets the destination unicode
         /// </summary>
-        public int? DestinationUnicode { get; set; }
-
-        /// <summary>
-        /// Gets or sets the source unicode as hexadecimal string
-        /// </summary>
-        public string? Destination
+        public string? DestinationUnicode
         {
-            get => DestinationUnicode?.ToString("X");
-            set => DestinationUnicode = string.IsNullOrEmpty(value) ? (int?)null : (int)new Int32Converter().ConvertFromInvariantString(value);
+            get => _destinationUnicode;
+            set => _destinationUnicode = GetHexValue(value);
+        }
+
+        private string? GetHexValue(string? value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (value.StartsWith("&#x"))
+            {
+                value = value.Substring(3);
+                return value.EndsWith(";") ? value[0..^1] : value;
+            }
+            if (value.StartsWith("0x"))
+            {
+                return value.Substring(2);
+            }
+            return value;
         }
     }
 }

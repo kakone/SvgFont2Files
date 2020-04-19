@@ -24,19 +24,9 @@
             Gets or sets the source unicode
             </summary>
         </member>
-        <member name="P:Svg.GlyphSetting.Source">
-            <summary>
-            Gets or sets the source unicode as hexadecimal string
-            </summary>
-        </member>
         <member name="P:Svg.GlyphSetting.DestinationUnicode">
             <summary>
             Gets or sets the destination unicode
-            </summary>
-        </member>
-        <member name="P:Svg.GlyphSetting.Destination">
-            <summary>
-            Gets or sets the source unicode as hexadecimal string
             </summary>
         </member>
         <member name="T:Svg.GlyphWriter">
@@ -80,7 +70,7 @@
             SVG file
             </summary>
         </member>
-        <member name="M:Svg.SvgFile.#ctor(System.String,System.Int32,System.String)">
+        <member name="M:Svg.SvgFile.#ctor(System.String,System.String,System.String)">
             <summary>
             Initializes a new instance of the <see cref="T:Svg.SvgFile"/> class
             </summary>
