@@ -44,15 +44,18 @@ namespace Svg
         /// <summary>
         /// Initializes a new instance of the <see cref="SvgFont"/> class
         /// </summary>
-        public SvgFont() : this(new SvgFileWriter())
+        /// <param name="consoleLogEnabled">true to enable console log, false otherwise</param>
+        public SvgFont(bool consoleLogEnabled = false) : this(consoleLogEnabled, new SvgFileWriter())
         {
         }
 
-        private SvgFont(IWriter writer)
+        private SvgFont(bool consoleLogEnabled, IWriter writer)
         {
+            ConsoleLogEnabled = consoleLogEnabled;
             Writer = writer;
         }
 
+        private bool ConsoleLogEnabled { get; }
         private IWriter Writer { get; }
 
         private int Parse(XmlNode xmlNode, string attributeName, int defaultValue)
@@ -123,21 +126,35 @@ namespace Svg
                 cancellationToken: cancellationToken);
         }
 
+        private void LogInformation(string message)
+        {
+            if (ConsoleLogEnabled)
+            {
+                Console.WriteLine(message);
+            }
+        }
+
+        private void LogExtractedIconsNumber(int count)
+        {
+            LogInformation($"{count} icons extracted");
+        }
+
         /// <summary>
         /// Converts a SVG font to individuals SVG files
         /// </summary>
         /// <param name="config">configuration file path</param>
         /// <param name="outputFolder">output folder</param>
         /// <param name="cancellationToken">a token that may be used to cancel the operation</param>
-        /// <returns>a <see cref="Task"/> representing the asynchronous operation</returns>
-        public async Task ToFilesAsync(string config, string? outputFolder = null, CancellationToken cancellationToken = default)
+        /// <returns>number of extracted icons</returns>
+        public async Task<int> ToFilesAsync(string config, string? outputFolder = null, CancellationToken cancellationToken = default)
         {
             var settings = await ReadConfigFileAsync(config, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
             {
-                return;
+                return 0;
             }
 
+            var count = 0;
             foreach (var group in settings.Where(s => s.DestinationUnicode != null).GroupBy(s => s.SourceFile))
             {
                 var input = group.Key;
@@ -145,12 +162,15 @@ namespace Svg
                 {
                     throw new ArgumentNullException(nameof(GlyphSetting.SourceFile));
                 }
-                await ToFilesAsync(Path.IsPathRooted(input) ? input : Path.Combine(Path.GetDirectoryName(config), input), outputFolder, group.ToList());
+                count += await ToFilesAsync(Path.IsPathRooted(input) ? input : Path.Combine(Path.GetDirectoryName(config), input), outputFolder, group.ToList());
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
             }
+
+            LogExtractedIconsNumber(count);
+            return count;
         }
 
         /// <summary>
@@ -160,24 +180,25 @@ namespace Svg
         /// <param name="outputFolder">output folder</param>
         /// <param name="config">configuration file path</param>
         /// <param name="cancellationToken">a token that may be used to cancel the operation</param>
-        /// <returns>a <see cref="Task"/> representing the asynchronous operation</returns>
-        public async Task ToFilesAsync(string? input = null, string? outputFolder = null, string? config = null, CancellationToken cancellationToken = default)
+        /// <returns>number of extracted icons</returns>
+        public async Task<int> ToFilesAsync(string? input = null, string? outputFolder = null, string? config = null, CancellationToken cancellationToken = default)
         {
             if (input == null)
             {
-                await ToFilesAsync(config!, outputFolder, cancellationToken);
-                return;
+                return await ToFilesAsync(config!, outputFolder, cancellationToken);
             }
 
             var settings = await ReadConfigFileAsync(config, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
             {
-                return;
+                return 0;
             }
-            await ToFilesAsync(input, outputFolder, settings, cancellationToken);
+            var count = await ToFilesAsync(input, outputFolder, settings, cancellationToken);
+            LogExtractedIconsNumber(count);
+            return count;
         }
 
-        private Task ToFilesAsync(string input, string? outputFolder = null, IEnumerable<GlyphSetting>? settings = null, CancellationToken cancellationToken = default)
+        private Task<int> ToFilesAsync(string input, string? outputFolder = null, IEnumerable<GlyphSetting>? settings = null, CancellationToken cancellationToken = default)
         {
             var xmlDocument = new XmlDocument();
             xmlDocument.Load(input);
@@ -191,8 +212,8 @@ namespace Svg
         /// <param name="outputFolder">output folder</param>
         /// <param name="settings">advanced settings</param>
         /// <param name="cancellationToken">a token that may be used to cancel the operation</param>
-        /// <returns>a <see cref="Task"/> representing the asynchronous operation</returns>
-        public async Task ToFilesAsync(XmlDocument xmlDocument, string? outputFolder = null, IEnumerable<GlyphSetting>? settings = null,
+        /// <returns>number of extracted icons</returns>
+        public async Task<int> ToFilesAsync(XmlDocument xmlDocument, string? outputFolder = null, IEnumerable<GlyphSetting>? settings = null,
             CancellationToken cancellationToken = default)
         {
             var defaultCharWidth = Parse(xmlDocument.GetElementsByTagName(FontTagName).Cast<XmlNode>().FirstOrDefault(), HorizAdvXAttributeName, DefaultSize);
@@ -206,6 +227,7 @@ namespace Svg
                 new DirectoryInfo(outputFolder).Create();
             }
 
+            var count = 0;
             foreach (XmlNode? xmlNode in xmlDocument.GetElementsByTagName(GlyphTagName))
             {
                 if (xmlNode == null)
@@ -215,8 +237,9 @@ namespace Svg
 
                 foreach (var glyph in GetFiles(xmlNode, defaultCharWidth, charHeight, charAscent, charDescent, settings))
                 {
-                    Console.WriteLine($"Save {glyph.GlyphName}");
+                    LogInformation($"Save {glyph.GlyphName}");
                     await Writer.WriteAsync(glyph, outputFolder, cancellationToken);
+                    count += 1;
                     if (cancellationToken.IsCancellationRequested)
                     {
                         break;
@@ -228,6 +251,7 @@ namespace Svg
                     break;
                 }
             }
+            return count;
         }
 
         private IEnumerable<SvgFile> GetFiles(XmlNode xmlNode, int defaultCharWidth = DefaultSize, int charHeight = DefaultSize, int charAscent = DefaultSize,
@@ -296,7 +320,7 @@ namespace Svg
         {
             using var textWriter = new StreamWriter(output ?? DefaultFontFilename, false, Encoding.UTF8);
             await textWriter.WriteAsync(string.Format(SvgFontFileHeader, Environment.NewLine, DefaultSize, Path.GetFileNameWithoutExtension(output)));
-            await new SvgFont(new GlyphWriter(textWriter)).ToFilesAsync(null, Path.GetDirectoryName(output), config, cancellationToken);
+            await new SvgFont(ConsoleLogEnabled, new GlyphWriter(textWriter)).ToFilesAsync(null, Path.GetDirectoryName(output), config, cancellationToken);
             await textWriter.WriteAsync(string.Format(SvgFontFileFooter, Environment.NewLine));
         }
     }

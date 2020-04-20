@@ -11,9 +11,9 @@ namespace SvgFont2SvgFont
         /// <param name="config">configuration file path for advanced setting</param>
         /// <param name="output">output file path</param>
         /// <returns>a <see cref="Task"/> representing the asynchronous operation</returns>
-        static async Task Main(string config, string? output = null)
+        static Task Main(string config, string? output = null)
         {
-            await new SvgFont().ToSvgFontAsync(config, output);
+            return new SvgFont(true).ToSvgFontAsync(config, output);
         }
     }
 }

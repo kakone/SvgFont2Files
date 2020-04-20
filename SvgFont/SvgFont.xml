@@ -116,10 +116,11 @@
             SVG font class
             </summary>
         </member>
-        <member name="M:Svg.SvgFont.#ctor">
+        <member name="M:Svg.SvgFont.#ctor(System.Boolean)">
             <summary>
             Initializes a new instance of the <see cref="T:Svg.SvgFont"/> class
             </summary>
+            <param name="consoleLogEnabled">true to enable console log, false otherwise</param>
         </member>
         <member name="M:Svg.SvgFont.ToFilesAsync(System.String,System.String,System.Threading.CancellationToken)">
             <summary>
@@ -128,7 +129,7 @@
             <param name="config">configuration file path</param>
             <param name="outputFolder">output folder</param>
             <param name="cancellationToken">a token that may be used to cancel the operation</param>
-            <returns>a <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation</returns>
+            <returns>number of extracted icons</returns>
         </member>
         <member name="M:Svg.SvgFont.ToFilesAsync(System.String,System.String,System.String,System.Threading.CancellationToken)">
             <summary>
@@ -138,7 +139,7 @@
             <param name="outputFolder">output folder</param>
             <param name="config">configuration file path</param>
             <param name="cancellationToken">a token that may be used to cancel the operation</param>
-            <returns>a <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation</returns>
+            <returns>number of extracted icons</returns>
         </member>
         <member name="M:Svg.SvgFont.ToFilesAsync(System.Xml.XmlDocument,System.String,System.Collections.Generic.IEnumerable{Svg.GlyphSetting},System.Threading.CancellationToken)">
             <summary>
@@ -148,7 +149,7 @@
             <param name="outputFolder">output folder</param>
             <param name="settings">advanced settings</param>
             <param name="cancellationToken">a token that may be used to cancel the operation</param>
-            <returns>a <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation</returns>
+            <returns>number of extracted icons</returns>
         </member>
         <member name="M:Svg.SvgFont.ToSvgFontAsync(System.String,System.String,System.Threading.CancellationToken)">
             <summary>

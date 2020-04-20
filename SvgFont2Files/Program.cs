@@ -14,7 +14,7 @@ namespace SvgFont2Files
         /// <returns>a <see cref="Task"/> representing the asynchronous operation</returns>
         static Task Main(string? input = null, string? output = null, string? config = null)
         {
-            return new SvgFont().ToFilesAsync(input, output, config);
+            return new SvgFont(true).ToFilesAsync(input, output, config);
         }
     }
 }
