@@ -150,18 +150,6 @@
             <param name="cancellationToken">a token that may be used to cancel the operation</param>
             <returns>a <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation</returns>
         </member>
-        <member name="M:Svg.SvgFont.GetFile(System.Xml.XmlNode,System.Int32,System.Int32,System.Int32,System.Int32,System.Collections.Generic.IEnumerable{Svg.GlyphSetting})">
-            <summary>
-            Gets a SVG file
-            </summary>
-            <param name="xmlNode">XML node</param>
-            <param name="defaultCharWidth">default char width</param>
-            <param name="charHeight">char height</param>
-            <param name="charAscent">char ascent</param>
-            <param name="charDescent">char descent</param>
-            <param name="settings">settings</param>
-            <returns>extracted file or null if there is no glyph in this line</returns>
-        </member>
         <member name="M:Svg.SvgFont.ToSvgFontAsync(System.String,System.String,System.Threading.CancellationToken)">
             <summary>
             Gets some icons from one or multiple SVG fonts and make a new SVG font

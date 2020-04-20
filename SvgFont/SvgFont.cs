@@ -87,25 +87,31 @@ namespace Svg
                 var glyphSettings = new List<GlyphSetting>();
                 var workbookPart = spreadsheetDocument.WorkbookPart;
                 var stringTable = workbookPart.SharedStringTablePart.SharedStringTable;
-                foreach (var row in workbookPart.WorksheetParts.First().Worksheet.Elements<SheetData>().First().Elements<Row>())
+                foreach (var worksheetPart in workbookPart.WorksheetParts)
                 {
-                    if (firstRow)
+                    foreach (var sheetData in worksheetPart.Worksheet.Elements<SheetData>())
                     {
-                        firstRow = false;
-                        continue;
-                    }
-
-                    var cells = row.Elements<Cell>();
-                    var destination = GetCellValue(stringTable, cells, 3);
-                    if (!string.IsNullOrWhiteSpace(destination))
-                    {
-                        glyphSettings.Add(new GlyphSetting()
+                        foreach (var row in sheetData.Elements<Row>())
                         {
-                            GlyphName = GetCellValue(stringTable, cells, 0),
-                            SourceFile = GetCellValue(stringTable, cells, 1),
-                            SourceUnicode = GetCellValue(stringTable, cells, 2)!,
-                            DestinationUnicode = destination
-                        });
+                            if (firstRow)
+                            {
+                                firstRow = false;
+                                continue;
+                            }
+
+                            var cells = row.Elements<Cell>();
+                            var destination = GetCellValue(stringTable, cells, 3);
+                            if (!string.IsNullOrWhiteSpace(destination))
+                            {
+                                glyphSettings.Add(new GlyphSetting()
+                                {
+                                    GlyphName = GetCellValue(stringTable, cells, 0),
+                                    SourceFile = GetCellValue(stringTable, cells, 1),
+                                    SourceUnicode = GetCellValue(stringTable, cells, 2)!,
+                                    DestinationUnicode = destination
+                                });
+                            }
+                        }
                     }
                 }
                 return glyphSettings;
@@ -207,12 +213,16 @@ namespace Svg
                     continue;
                 }
 
-                var glyph = GetFile(xmlNode, defaultCharWidth, charHeight, charAscent, charDescent, settings);
-                if (glyph != null)
+                foreach (var glyph in GetFiles(xmlNode, defaultCharWidth, charHeight, charAscent, charDescent, settings))
                 {
                     Console.WriteLine($"Save {glyph.GlyphName}");
                     await Writer.WriteAsync(glyph, outputFolder, cancellationToken);
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
                 }
+
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
@@ -220,52 +230,45 @@ namespace Svg
             }
         }
 
-        /// <summary>
-        /// Gets a SVG file
-        /// </summary>
-        /// <param name="xmlNode">XML node</param>
-        /// <param name="defaultCharWidth">default char width</param>
-        /// <param name="charHeight">char height</param>
-        /// <param name="charAscent">char ascent</param>
-        /// <param name="charDescent">char descent</param>
-        /// <param name="settings">settings</param>
-        /// <returns>extracted file or null if there is no glyph in this line</returns>
-        public SvgFile? GetFile(XmlNode xmlNode, int defaultCharWidth = DefaultSize, int charHeight = DefaultSize, int charAscent = DefaultSize,
+        private IEnumerable<SvgFile> GetFiles(XmlNode xmlNode, int defaultCharWidth = DefaultSize, int charHeight = DefaultSize, int charAscent = DefaultSize,
             int charDescent = 0, IEnumerable<GlyphSetting>? settings = null)
         {
             var pathData = xmlNode.Attributes[PathDataAttributeName]?.Value;
             if (string.IsNullOrEmpty(pathData))
             {
-                return null;
+                return Array.Empty<SvgFile>();
             }
 
             var sourceUnicode = xmlNode.Attributes[UnicodeAttributeName]?.Value;
             if (string.IsNullOrEmpty(sourceUnicode))
             {
-                return null;
+                return Array.Empty<SvgFile>();
             }
 
             if (sourceUnicode.Length == 1)
             {
                 sourceUnicode = ((int)sourceUnicode.First()).ToString("X");
             }
-            var destUnicode = sourceUnicode;
-            string? glyphName = null;
 
-            if (settings != null)
+            var files = new List<SvgFile>();
+            if (settings == null)
             {
-                var setting = settings.FirstOrDefault(s => s.SourceUnicode.Equals(sourceUnicode, StringComparison.InvariantCultureIgnoreCase));
-                if (setting == null)
+                files.Add(GetFile(xmlNode, sourceUnicode, sourceUnicode, pathData, defaultCharWidth, charHeight, charAscent, charDescent));
+            }
+            else
+            {
+                foreach (var setting in settings.Where(s => s.SourceUnicode.Equals(sourceUnicode, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    return null;
-                }
-                glyphName = setting.GlyphName;
-                if (setting.DestinationUnicode != null)
-                {
-                    destUnicode = setting.DestinationUnicode;
+                    files.Add(GetFile(xmlNode, sourceUnicode, setting?.DestinationUnicode ?? sourceUnicode, pathData,
+                        defaultCharWidth, charHeight, charAscent, charDescent, setting!.GlyphName));
                 }
             }
+            return files;
+        }
 
+        private SvgFile GetFile(XmlNode xmlNode, string sourceUnicode, string destUnicode, string pathData, int defaultCharWidth, int charHeight,
+            int charAscent, int charDescent, string? glyphName = null)
+        {
             if (string.IsNullOrEmpty(glyphName))
             {
                 glyphName = xmlNode.Attributes[GlyphNameAttributeName]?.Value;
