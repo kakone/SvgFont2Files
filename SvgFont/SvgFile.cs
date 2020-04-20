@@ -43,8 +43,13 @@ namespace Svg
         /// <returns>the file path</returns>
         public string GetPath(string? outputFolder)
         {
-            return Path.Combine(outputFolder ?? string.Empty,
-                $"{GlyphName}{(int.TryParse(Unicode, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var unicode) ? $"-U0x{unicode:X}" : string.Empty)}.svg");
+            return Path.Combine(outputFolder ?? string.Empty, $"{ToString()}.svg");
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{GlyphName}{(int.TryParse(Unicode, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var unicode) ? $"-U0x{unicode:X}" : string.Empty)}";
         }
     }
 }

@@ -136,7 +136,7 @@ namespace Svg
 
         private void LogExtractedIconsNumber(int count)
         {
-            LogInformation($"{count} icons extracted");
+            LogInformation($" {count} icons extracted{Environment.NewLine}");
         }
 
         /// <summary>
@@ -162,6 +162,7 @@ namespace Svg
                 {
                     throw new ArgumentNullException(nameof(GlyphSetting.SourceFile));
                 }
+                LogInformation($"--- {input} ---");
                 count += await ToFilesAsync(Path.IsPathRooted(input) ? input : Path.Combine(Path.GetDirectoryName(config), input), outputFolder, group.ToList());
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -193,9 +194,7 @@ namespace Svg
             {
                 return 0;
             }
-            var count = await ToFilesAsync(input, outputFolder, settings, cancellationToken);
-            LogExtractedIconsNumber(count);
-            return count;
+            return await ToFilesAsync(input, outputFolder, settings, cancellationToken);
         }
 
         private Task<int> ToFilesAsync(string input, string? outputFolder = null, IEnumerable<GlyphSetting>? settings = null, CancellationToken cancellationToken = default)
@@ -227,7 +226,7 @@ namespace Svg
                 new DirectoryInfo(outputFolder).Create();
             }
 
-            var count = 0;
+            var extractedGlyphs = new List<string>();
             foreach (XmlNode? xmlNode in xmlDocument.GetElementsByTagName(GlyphTagName))
             {
                 if (xmlNode == null)
@@ -237,9 +236,9 @@ namespace Svg
 
                 foreach (var glyph in GetFiles(xmlNode, defaultCharWidth, charHeight, charAscent, charDescent, settings))
                 {
-                    LogInformation($"Save {glyph.GlyphName}");
+                    LogInformation(glyph.ToString());
                     await Writer.WriteAsync(glyph, outputFolder, cancellationToken);
-                    count += 1;
+                    extractedGlyphs.Add(glyph.Unicode);
                     if (cancellationToken.IsCancellationRequested)
                     {
                         break;
@@ -251,7 +250,15 @@ namespace Svg
                     break;
                 }
             }
-            return count;
+            if (ConsoleLogEnabled && settings != null)
+            {
+                foreach (var unicode in settings.Select(s => s.DestinationUnicode).Except(extractedGlyphs))
+                {
+                    LogInformation($"!!! Glyph {settings.First(s => s.DestinationUnicode == unicode).SourceUnicode} not found !!!");
+                }
+            }
+            LogExtractedIconsNumber(extractedGlyphs.Count);
+            return extractedGlyphs.Count;
         }
 
         private IEnumerable<SvgFile> GetFiles(XmlNode xmlNode, int defaultCharWidth = DefaultSize, int charHeight = DefaultSize, int charAscent = DefaultSize,

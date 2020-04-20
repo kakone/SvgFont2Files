@@ -100,6 +100,9 @@
             <param name="outputFolder">output folder</param>
             <returns>the file path</returns>
         </member>
+        <member name="M:Svg.SvgFile.ToString">
+            <inheritdoc/>
+        </member>
         <member name="T:Svg.SvgFileWriter">
             <summary>
             SVG file writer to save a glyph on disk
