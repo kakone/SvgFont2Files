@@ -29,6 +29,11 @@
             Gets or sets the destination unicode
             </summary>
         </member>
+        <member name="P:Svg.GlyphSetting.MaxScale">
+            <summary>
+            Gets or sets the max scale
+            </summary>
+        </member>
         <member name="T:Svg.GlyphWriter">
             <summary>
             Glyph writer to add a glyph in a SVG font

@@ -37,6 +37,11 @@ namespace Svg
             set => _destinationUnicode = GetHexValue(value);
         }
 
+        /// <summary>
+        /// Gets or sets the max scale
+        /// </summary>
+        public float? MaxScale { get; set; }
+
         private string? GetHexValue(string? value)
         {
             if (value == null)
