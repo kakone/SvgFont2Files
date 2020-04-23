@@ -36,7 +36,7 @@ namespace Svg
             "<svg xmlns=\"http://www.w3.org/2000/svg\">{0}" +
             "<defs>{0}" +
             "<font id=\"{2}\" horiz-adv-x=\"{1}\">{0}" +
-            "<font-face units-per-em=\"{1}\" ascent=\"{1}\" />{0}" +
+            "<font-face font-family=\"{2}\" units-per-em=\"{1}\" ascent=\"{1}\" descent=\"0\" />{0}" +
             "<missing-glyph horiz-adv-x=\"{1}\" />{0}";
         private const string SvgFontFileFooter = "</font>{0}" +
             "</defs>{0}" +
@@ -325,15 +325,17 @@ namespace Svg
             }
             else
             {
-                var scale = Math.Min(newSize / skPath.Bounds.Width, newSize / skPath.Bounds.Height);
+                skPath.Transform(SKMatrix.MakeScale(1, Writer.Flip ? -1 : 1));
+                skPath.Transform(SKMatrix.MakeTranslation(-charWidth / 2, -charHeight / 2));
+                var bounds = skPath.Bounds;
+                var halfNewSize = newSize / 2;
+                var scale = Math.Min(Math.Min(halfNewSize / -bounds.Left, halfNewSize / bounds.Right), Math.Min(halfNewSize / -bounds.Top, halfNewSize / bounds.Bottom));
                 if (maxScale > 0)
                 {
                     scale = Math.Min((float)maxScale, scale);
                 }
-                skPath.Transform(SKMatrix.MakeScale(scale, Writer.Flip ? -scale : scale));
-                var dx = (scale > newSize / charWidth ? 1 : -1) * ((newSize - charWidth * scale) / 2);
-                var dy = (scale > newSize / charHeight ? 1 : -1) * ((newSize - charHeight * scale) / 2);
-                skPath.Transform(SKMatrix.MakeTranslation(dx, dy));
+                skPath.Transform(SKMatrix.MakeScale(scale, scale));
+                skPath.Transform(SKMatrix.MakeTranslation(newSize / 2, newSize / 2));
             }
             return new SvgFile(glyphName, destUnicode, skPath.Simplify().ToSvgPathData());
         }
