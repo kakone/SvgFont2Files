@@ -314,19 +314,31 @@ namespace Svg
                 }
             }
 
-            var skPath = SKPath.ParseSvgPathData(pathData);
-            skPath.Transform(SKMatrix.MakeTranslation(0, Writer.Flip ? -charAscent : charDescent));
-            var charWidth = Parse(xmlNode, HorizAdvXAttributeName, defaultCharWidth);
+            if (!Writer.Flip && (maxScale == null || maxScale < 0))
+            {
+                return new SvgFile(glyphName, destUnicode, pathData);
+            }
+
             var newSize = (float)DefaultSize;
+            var charWidth = Parse(xmlNode, HorizAdvXAttributeName, defaultCharWidth);
+            var skPath = SKPath.ParseSvgPathData(pathData);
+            var matrix = SKMatrix.MakeTranslation(0, Writer.Flip ? -charAscent : charDescent);
             if (maxScale == null || maxScale == 0)
             {
                 var scale = Math.Min(newSize / charWidth, newSize / charHeight);
-                skPath.Transform(SKMatrix.MakeScale(scale, Writer.Flip ? -scale : scale));
+                if (Writer.Flip || scale != 1)
+                {
+                    SKMatrix.PostConcat(ref matrix, SKMatrix.MakeScale(scale, Writer.Flip ? -scale : scale));
+                    skPath.Transform(matrix);
+                }
             }
             else
             {
-                skPath.Transform(SKMatrix.MakeScale(1, Writer.Flip ? -1 : 1));
-                skPath.Transform(SKMatrix.MakeTranslation(-charWidth / 2, -charHeight / 2));
+                var scaleAndTranslateMatrix = new SKMatrix();
+                scaleAndTranslateMatrix.SetScaleTranslate(1, Writer.Flip ? -1 : 1, -charWidth / 2, -charHeight / 2);
+                SKMatrix.PostConcat(ref matrix, ref scaleAndTranslateMatrix);
+                skPath.Transform(matrix);
+
                 var bounds = skPath.Bounds;
                 var halfNewSize = newSize / 2;
                 var scale = Math.Min(Math.Min(halfNewSize / -bounds.Left, halfNewSize / bounds.Right), Math.Min(halfNewSize / -bounds.Top, halfNewSize / bounds.Bottom));
@@ -334,8 +346,9 @@ namespace Svg
                 {
                     scale = Math.Min((float)maxScale, scale);
                 }
-                skPath.Transform(SKMatrix.MakeScale(scale, scale));
-                skPath.Transform(SKMatrix.MakeTranslation(newSize / 2, newSize / 2));
+                scaleAndTranslateMatrix = new SKMatrix();
+                scaleAndTranslateMatrix.SetScaleTranslate(scale, scale, newSize / 2, newSize / 2);
+                skPath.Transform(scaleAndTranslateMatrix);
             }
             return new SvgFile(glyphName, destUnicode, skPath.Simplify().ToSvgPathData());
         }
